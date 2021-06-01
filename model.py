@@ -11,6 +11,7 @@ from densepose import add_densepose_config
 from detectron2.engine.defaults import DefaultPredictor
 
 import numpy as np
+import io
 
 class DensePoseEstimator:
   def __init__(self):
