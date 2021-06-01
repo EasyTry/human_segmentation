@@ -40,7 +40,7 @@ class DensePoseEstimator:
     mask = data[0][0].labels.cpu().numpy()
     bbox = data[1].cpu().numpy()
     
-    x, y, w, h = bbox
+    x, y, w, h = bbox[0]
     x, y, w, h = int(x.item()), int(y.item()), int(w.item()), int(h.item())
     #h_min = np.minimum(h-y, mask.shape[0])
     #w_min = np.minimum(w-x, mask.shape[1])
