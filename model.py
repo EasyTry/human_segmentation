@@ -31,21 +31,22 @@ class DensePoseEstimator:
         self.predictor = DefaultPredictor(cfg)
         
   def __call__(self, data):
-    image = np.load(io.BytesIO(data))
-    outputs = self.predictor(image)["instances"]
+      image = np.load(io.BytesIO(data))
+      outputs = self.predictor(image)["instances"]
 
-    extractor = DensePoseResultExtractor()
-    data = extractor(outputs)
-    #import pdb; pdb.set_trace()
-    mask = data[0][0].labels.cpu().numpy()
-    bbox = data[1].cpu().numpy()
-    
-    x, y, w, h = bbox[0]
-    x, y, w, h = int(x.item()), int(y.item()), int(w.item()), int(h.item())
-    #h_min = np.minimum(h-y, mask.shape[0])
-    #w_min = np.minimum(w-x, mask.shape[1])
+      extractor = DensePoseResultExtractor()
+      data = extractor(outputs)
+      uv = (
+              quantize_densepose_chart_result(data[0][0])
+              .to("cpu")
+              .labels_uv_uint8.permute(1, 2, 0)
+              .numpy()
+          )
 
-    big_mask = np.zeros((image.shape[0], image.shape[1]))
-    big_mask[y:y+h, x:x+w] = mask
-    
-    return big_mask        
+      bbox = data[1][0].cpu().numpy()
+      x, y = int(bbox[0]), int(bbox[1])
+      h, w = data[0][0].labels.shape
+
+      uv_original = np.zeros_like(image)
+      uv_original[y: y + h, x: x + w] = uv
+      return uv_original
